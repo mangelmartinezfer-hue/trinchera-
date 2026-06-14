@@ -1,0 +1,33 @@
+﻿# Datos raw de tick (archivos grandes, no van al repo)
+data/historic/*.csv
+
+# Outputs generados (se regeneran con el pipeline)
+outputs/
+
+# Charts generados
+charts/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
