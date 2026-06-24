@@ -1,131 +1,137 @@
-# Trinchera Mean Reversion Strategy
+# Trinchera — Estrategia de Mean Reversion en NQ Futuros
 
-Advanced mean reversion trading strategy for NQ (Nasdaq-100 E-mini) futures based on big volume detection and market profile analysis.
+```bash
+git clone https://github.com/ferranfont/trinchera.git && cd trinchera && pip install pandas plotly
+```
+
+Estrategia avanzada de mean reversion para futuros NQ (Nasdaq-100 E-mini) basada en detección de volumen alto y análisis de perfil de mercado.
 
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
-[![Status](https://img.shields.io/badge/status-Active-success)](https://github.com/ferranfont/trinchera)
-
-## Overview
-
-The Trinchera strategy identifies large volume spikes (>200 contracts) and creates mean reversion levels around the closing price. It trades when price touches these extreme levels (±10 points from the volume spike), expecting the price to revert to the mean.
-
-### Key Features
-
-- ✅ **Fully Portable**: Self-contained with local `utils/` folder (no external dependencies)
-- ✅ **Automated Pipeline**: One command runs entire backtest workflow
-- ✅ **Date-Based Configuration**: Centralized DATE parameter for easy batch processing
-- ✅ **Interactive Visualizations**: HTML charts with Plotly showing trades, equity, and performance
-- ✅ **Market Profile Analysis**: Rolling volume profile with 1-second precision
-- ✅ **Multiple Filter System**: SMA, Time-of-Day, GRID, Trailing Stop
-- ✅ **Comprehensive Reports**: Detailed performance metrics and risk analysis
+[![Licencia](https://img.shields.io/badge/licencia-Propietario-red)](LICENSE)
+[![Estado](https://img.shields.io/badge/estado-Activo-success)](https://github.com/ferranfont/trinchera)
 
 ---
 
-## Quick Start
+## Descripción general
 
-### 1. Configure Date
+La estrategia Trinchera identifica picos de volumen alto (>200 contratos) y crea niveles de mean reversion alrededor del precio de cierre. Opera cuando el precio toca esos niveles extremos (±10 puntos desde el pico de volumen), esperando que el precio revierta hacia la media.
 
-Edit `config_trinchera.py`:
+### Características principales
+
+- **Totalmente portable**: Autónomo con carpeta local `utils/` (sin dependencias externas)
+- **Pipeline automatizado**: Un solo comando ejecuta todo el flujo de backtest
+- **Configuración por fecha**: Parámetro DATE centralizado para procesamiento por lotes
+- **Visualizaciones interactivas**: Gráficos HTML con Plotly mostrando operaciones, equity y rendimiento
+- **Análisis de perfil de mercado**: Perfil de volumen rolling con precisión de 1 segundo
+- **Sistema de filtros múltiples**: SMA, Horario, GRID, Stop Trailing
+- **Informes detallados**: Métricas de rendimiento y análisis de riesgo completos
+
+---
+
+## Inicio rápido
+
+### 1. Configurar la fecha
+
+Edita `config_trinchera.py`:
 
 ```python
-DATE = "20251104"  # Date for time_and_sales_nq_{DATE}.csv file
+DATE = "20251104"  # Fecha del archivo time_and_sales_nq_{DATE}.csv
 ```
 
-### 2. Add Data
+### 2. Añadir datos
 
-Place your tick data file in:
+Coloca el archivo de tick data en:
 ```
 data/historic/time_and_sales_nq_20251104.csv
 ```
 
-### 3. Run Pipeline
+### 3. Ejecutar el pipeline
 
 ```bash
 python main_trinchera.py
 ```
 
-This automatically:
-- ✅ Checks if data is processed (runs `util_trinchera.py` if needed)
-- ✅ Detects big volume events
-- ✅ Executes trading strategy
-- ✅ Generates interactive charts
-- ✅ Creates summary reports
+Esto hace automáticamente:
+- Comprueba si los datos están procesados (ejecuta `util_trinchera.py` si es necesario)
+- Detecta eventos de volumen alto
+- Ejecuta la estrategia de trading
+- Genera gráficos interactivos
+- Crea informes resumen
 
 ---
 
-## Strategy Logic
+## Lógica de la estrategia
 
-### 1. Big Volume Detection
+### 1. Detección de volumen alto
 
-Identifies frames where `total_volume > BIG_VOLUME_TRIGGER` (default: 200 contracts)
+Identifica barras donde `total_volume > BIG_VOLUME_TRIGGER` (por defecto: 200 contratos)
 
-### 2. Mean Reversion Levels
+### 2. Niveles de mean reversion
 
-Calculates levels around the big volume close price:
-- **Upper Level** (RED): `close_price + MEAN_REVERS_EXPAND` → SELL zone
-- **Lower Level** (GREEN): `close_price - MEAN_REVERS_EXPAND` → BUY zone
+Calcula niveles alrededor del precio de cierre del volumen alto:
+- **Nivel superior** (ROJO): `precio_cierre + MEAN_REVERS_EXPAND` → zona de VENTA
+- **Nivel inferior** (VERDE): `precio_cierre - MEAN_REVERS_EXPAND` → zona de COMPRA
 
-### 3. Trade Execution
+### 3. Ejecución de operaciones
 
-- **SELL Signal**: Price touches red line → expect drop
-- **BUY Signal**: Price touches green line → expect rise
+- **Señal VENTA**: El precio toca la línea roja → se espera bajada
+- **Señal COMPRA**: El precio toca la línea verde → se espera subida
 
-### 4. Risk Management
+### 4. Gestión de riesgo
 
-- **Take Profit**: 5 points ($100)
-- **Stop Loss**: 9 points ($180)
-- **Timeout**: Levels expire after configured duration
+- **Take Profit**: 5 puntos ($100)
+- **Stop Loss**: 9 puntos ($180)
+- **Timeout**: Los niveles expiran tras la duración configurada
 
 ---
 
-## Project Structure
+## Estructura del proyecto
 
 ```
 trinchera_strategy/
-├── README.md                          # This file
-├── config_trinchera.py               # ⚙️ Centralized configuration (DATE, TP/SL, filters)
-├── main_trinchera.py                 # 🚀 Main pipeline orchestrator
+├── README.md                          # Este archivo
+├── config_trinchera.py               # Configuración centralizada (DATE, TP/SL, filtros)
+├── main_trinchera.py                 # Orquestador principal del pipeline
 │
-├── utils/                            # 📦 Portable utilities (self-contained)
+├── utils/                            # Utilidades portables (autónomas)
 │   ├── __init__.py
-│   ├── rolling_profile.py           # Market Profile calculator
-│   ├── tick.py                      # Tick data structure
-│   └── parse_utils.py               # Timestamp & number parsers
+│   ├── rolling_profile.py           # Calculadora de Perfil de Mercado
+│   ├── tick.py                      # Estructura de datos de tick
+│   └── parse_utils.py               # Parsers de timestamp y número
 │
-├── util_trinchera.py                # STEP 0: Tick → Frame processor
-├── find_big_volume.py               # STEP 1: Volume detector
-├── strat_trinchera.py               # STEP 2: Trading strategy
-├── plot_trinchera_trades.py         # STEP 3: Trade visualization
-├── summary_trinchera.py             # STEP 4: Summary report
-└── plot_equity_trinchera.py         # STEP 5: Equity curve
+├── util_trinchera.py                # PASO 0: Procesador Tick → Frame
+├── find_big_volume.py               # PASO 1: Detector de volumen alto
+├── strat_trinchera.py               # PASO 2: Estrategia de trading
+├── plot_trinchera_trades.py         # PASO 3: Visualización de operaciones
+├── summary_trinchera.py             # PASO 4: Informe resumen
+└── plot_equity_trinchera.py         # PASO 5: Curva de equity
 │
-├── data/                            # 📁 Input data
+├── data/                            # Datos de entrada
 │   └── historic/
 │       └── time_and_sales_nq_{DATE}.csv
 │
-├── outputs/                         # 📊 Processed data
-│   ├── db_trinchera_all_data_{DATE}.csv    # OHLCV + Market Profile
-│   ├── db_trinchera_bins_{DATE}.csv        # Big volume events
-│   └── db_trinchera_TR_{DATE}.csv          # Executed trades
+├── outputs/                         # Datos procesados
+│   ├── db_trinchera_all_data_{DATE}.csv    # OHLCV + Perfil de Mercado
+│   ├── db_trinchera_bins_{DATE}.csv        # Eventos de volumen alto
+│   └── db_trinchera_TR_{DATE}.csv          # Operaciones ejecutadas
 │
-└── charts/                          # 📈 HTML visualizations
-    ├── chart_trinchera_trades_{DATE}.html  # Trade markers
-    ├── summary_trinchera_{DATE}.html       # Performance metrics
-    └── equity_trinchera_{DATE}.html        # Equity curve
+└── charts/                          # Visualizaciones HTML
+    ├── chart_trinchera_trades_{DATE}.html  # Marcadores de operaciones
+    ├── summary_trinchera_{DATE}.html       # Métricas de rendimiento
+    └── equity_trinchera_{DATE}.html        # Curva de equity
 ```
 
 ---
 
-## Installation
+## Instalación
 
-### Prerequisites
+### Requisitos previos
 
 ```bash
 pip install pandas plotly
 ```
 
-### Clone Repository
+### Clonar el repositorio
 
 ```bash
 git clone https://github.com/ferranfont/trinchera.git
@@ -134,196 +140,194 @@ cd trinchera
 
 ---
 
-## Configuration
+## Configuración
 
-### DATE Configuration (CRITICAL)
+### Parámetro DATE (IMPORTANTE)
 
-**The `DATE` parameter is the ONLY place where you specify the date to process.**
+**El parámetro `DATE` es el ÚNICO lugar donde se especifica la fecha a procesar.**
 
-All scripts automatically use this centralized DATE:
-- ✅ `util_trinchera.py` - Looks for `time_and_sales_nq_{DATE}.csv`
-- ✅ `find_big_volume.py` - Loads `db_trinchera_all_data_{DATE}.csv`, creates `db_trinchera_bins_{DATE}.csv`
-- ✅ `strat_trinchera.py` - Loads bins and data with DATE, creates `db_trinchera_TR_{DATE}.csv`
-- ✅ `plot_trinchera_trades.py` - Loads all files with DATE
-- ✅ `summary_trinchera.py` - Loads trades with DATE, includes DATE in HTML title
-- ✅ `plot_equity_trinchera.py` - Loads trades with DATE
+Todos los scripts usan automáticamente este DATE centralizado:
+- `util_trinchera.py` → busca `time_and_sales_nq_{DATE}.csv`
+- `find_big_volume.py` → carga y crea archivos con `{DATE}`
+- `strat_trinchera.py` → carga bins y datos con DATE
+- `plot_trinchera_trades.py` → carga todos los archivos con DATE
+- `summary_trinchera.py` → incluye DATE en el título HTML
+- `plot_equity_trinchera.py` → carga operaciones con DATE
 
-**Important**: NEVER hardcode dates in individual scripts. Always import and use `DATE` from `config_trinchera.py`.
+**Importante**: NUNCA escribas fechas fijas en los scripts individuales. Siempre importa y usa `DATE` desde `config_trinchera.py`.
 
-### Core Parameters (`config_trinchera.py`)
+### Parámetros principales (`config_trinchera.py`)
 
 ```python
 # ============================================================================
-# DATA SOURCE
+# FUENTE DE DATOS
 # ============================================================================
-DATE = "20251104"  # Date for time_and_sales_nq_{DATE}.csv file
+DATE = "20251104"  # Fecha del archivo time_and_sales_nq_{DATE}.csv
 
 # ============================================================================
-# BIG VOLUME DETECTION
+# DETECCIÓN DE VOLUMEN ALTO
 # ============================================================================
-BIG_VOLUME_TRIGGER = 200           # Minimum volume to detect (contracts)
-BIG_VOLUME_TIMEOUT = 10            # Big volume effect duration (minutes)
+BIG_VOLUME_TRIGGER = 200           # Volumen mínimo a detectar (contratos)
+BIG_VOLUME_TIMEOUT = 10            # Duración del efecto de volumen alto (minutos)
 
 # ============================================================================
-# TRADING PARAMETERS
+# PARÁMETROS DE TRADING
 # ============================================================================
-TP_POINTS = 5.0                    # Take profit (points) → $100
-SL_POINTS = 9.0                    # Stop loss (points) → $180
-MEAN_REVERS_EXPAND = 10            # Distance from close price (points)
-MEAN_REVERSE_TIMEOUT_ORDER = 3    # Mean reversion timeout (minutes)
+TP_POINTS = 5.0                    # Take profit (puntos) → $100
+SL_POINTS = 9.0                    # Stop loss (puntos) → $180
+MEAN_REVERS_EXPAND = 10            # Distancia desde precio de cierre (puntos)
+MEAN_REVERSE_TIMEOUT_ORDER = 3    # Timeout de mean reversion (minutos)
 
 # ============================================================================
-# FILTERS
+# FILTROS
 # ============================================================================
-FILTER_BY_SMA = False              # Enable SMA-200 directional filter
-FILTER_TIME_OF_DAY = False         # Enable time-of-day filter
-FILTER_USE_GRID = False            # Enable second entry (grid system)
+FILTER_BY_SMA = False              # Activar filtro direccional SMA-200
+FILTER_TIME_OF_DAY = False         # Activar filtro horario
+FILTER_USE_GRID = False            # Activar segunda entrada (sistema GRID)
 
 # ============================================================================
-# ADVANCED FEATURES
+# FUNCIONES AVANZADAS
 # ============================================================================
-# SMA Trailing Stop
-SMA_TRAILING_STOP = False          # Dynamic trailing stop (disables fixed TP)
-TRAILING_STOP_ATR_MULT = 0.75      # Distance from extreme price (points)
+# Stop Trailing con SMA
+SMA_TRAILING_STOP = False          # Stop trailing dinámico (desactiva TP fijo)
+TRAILING_STOP_ATR_MULT = 0.75      # Distancia desde precio extremo (puntos)
 
-# Cash & Trail Hybrid
-SMA_CASH_TRAILING_ENABLED = False  # Hybrid: Fixed SL → Trailing after profit
-SMA_CASH_TRAILING = 25.0           # Activation threshold (points in favor)
-SMA_CASH_TRAILING_DISTANCE = 10.0  # Trailing distance after activation
+# Híbrido Cash & Trail
+SMA_CASH_TRAILING_ENABLED = False  # Híbrido: SL fijo → Trailing tras beneficio
+SMA_CASH_TRAILING = 25.0           # Umbral de activación (puntos a favor)
+SMA_CASH_TRAILING_DISTANCE = 10.0  # Distancia trailing tras activación
 
-# GRID System (Second Entry)
-GRID_MEAN_REVERS_EXPAND = 5.0      # Additional distance for 2nd entry
-GRID_TP_POINTS = 4.0               # TP from average entry price
-GRID_SL_POINTS = 3.0               # SL beyond second entry
+# Sistema GRID (Segunda Entrada)
+GRID_MEAN_REVERS_EXPAND = 5.0      # Distancia adicional para 2ª entrada
+GRID_TP_POINTS = 4.0               # TP desde precio medio de entrada
+GRID_SL_POINTS = 3.0               # SL más allá de la segunda entrada
 ```
 
 ---
 
-## Data Format
+## Formato de datos
 
-### Input File
+### Archivo de entrada
 
-**Location**: `data/historic/time_and_sales_nq_{DATE}.csv`
+**Ubicación**: `data/historic/time_and_sales_nq_{DATE}.csv`
 
-**Format** (European CSV):
+**Formato** (CSV europeo):
 ```csv
 Timestamp;Precio;Volumen;Lado
 2025-11-04 06:00:00.404;20425.25;1;BID
 2025-11-04 06:00:00.512;20425.50;2;ASK
 ```
 
-**Requirements**:
-- Separator: `;` (semicolon)
-- Decimal: `,` (comma)
-- Columns: `Timestamp`, `Precio`, `Volumen`, `Lado`
-- `Lado` values: `"BID"` or `"ASK"`
+**Requisitos**:
+- Separador: `;` (punto y coma)
+- Decimal: `,` (coma)
+- Columnas: `Timestamp`, `Precio`, `Volumen`, `Lado`
+- Valores de `Lado`: `"BID"` o `"ASK"`
 
 ---
 
-## Pipeline Execution
+## Ejecución del pipeline
 
-### Automatic Mode (Recommended)
+### Modo automático (recomendado)
 
 ```bash
 python main_trinchera.py
 ```
 
-**Steps executed**:
-1. ✅ Check if `db_trinchera_all_data_{DATE}.csv` exists
-2. ✅ If not → Run `util_trinchera.py` automatically
-3. ✅ Detect big volume events → `db_trinchera_bins_{DATE}.csv`
-4. ✅ Execute strategy → `db_trinchera_TR_{DATE}.csv`
-5. ✅ Generate trade chart → `chart_trinchera_trades_{DATE}.html`
-6. ✅ Generate summary → `summary_trinchera_{DATE}.html`
-7. ✅ Generate equity curve → `equity_trinchera_{DATE}.html`
+**Pasos ejecutados**:
+1. Comprueba si existe `db_trinchera_all_data_{DATE}.csv`
+2. Si no existe → ejecuta `util_trinchera.py` automáticamente
+3. Detecta eventos de volumen alto → `db_trinchera_bins_{DATE}.csv`
+4. Ejecuta estrategia → `db_trinchera_TR_{DATE}.csv`
+5. Genera gráfico de operaciones → `chart_trinchera_trades_{DATE}.html`
+6. Genera resumen → `summary_trinchera_{DATE}.html`
+7. Genera curva de equity → `equity_trinchera_{DATE}.html`
 
-### Manual Mode (Step by Step)
+### Modo manual (paso a paso)
 
 ```bash
-# STEP 0: Process tick data (run once per date)
+# PASO 0: Procesar tick data (ejecutar una vez por fecha)
 python util_trinchera.py
 
-# STEP 1: Detect big volume
+# PASO 1: Detectar volumen alto
 python find_big_volume.py
 
-# STEP 2: Run strategy
+# PASO 2: Ejecutar estrategia
 python strat_trinchera.py
 
-# STEP 3: Generate trade chart
+# PASO 3: Generar gráfico de operaciones
 python plot_trinchera_trades.py
 
-# STEP 4: Generate summary
+# PASO 4: Generar resumen
 python summary_trinchera.py
 
-# STEP 5: Generate equity curve
+# PASO 5: Generar curva de equity
 python plot_equity_trinchera.py
 ```
 
 ---
 
-## Output Files
+## Archivos de salida
 
-### Processed Data (`outputs/`)
+### Datos procesados (`outputs/`)
 
-| File | Description | Size (typical) |
-|------|-------------|----------------|
-| `db_trinchera_all_data_{DATE}.csv` | 1-second OHLCV + Market Profile | ~10-15 MB |
-| `db_trinchera_bins_{DATE}.csv` | Big volume events with levels | ~6-30 KB |
-| `db_trinchera_TR_{DATE}.csv` | Executed trades with P&L | ~4-30 KB |
+| Archivo | Descripción | Tamaño (típico) |
+|---------|-------------|-----------------|
+| `db_trinchera_all_data_{DATE}.csv` | OHLCV de 1 segundo + Perfil de Mercado | ~10-15 MB |
+| `db_trinchera_bins_{DATE}.csv` | Eventos de volumen alto con niveles | ~6-30 KB |
+| `db_trinchera_TR_{DATE}.csv` | Operaciones ejecutadas con P&L | ~4-30 KB |
 
-### HTML Charts (`charts/`)
+### Gráficos HTML (`charts/`)
 
-| File | Description | Features |
-|------|-------------|----------|
-| `chart_trinchera_trades_{DATE}.html` | Trade visualization | Interactive markers, levels, volume |
-| `summary_trinchera_{DATE}.html` | Performance report | Metrics table with date in header |
-| `equity_trinchera_{DATE}.html` | Equity curve | 3-panel chart (equity, P&L, drawdown) |
-
-**Note**: All files include `{DATE}` in filename and title for easy identification.
+| Archivo | Descripción | Características |
+|---------|-------------|-----------------|
+| `chart_trinchera_trades_{DATE}.html` | Visualización de operaciones | Marcadores interactivos, niveles, volumen |
+| `summary_trinchera_{DATE}.html` | Informe de rendimiento | Tabla de métricas con fecha en cabecera |
+| `equity_trinchera_{DATE}.html` | Curva de equity | Gráfico 3 paneles (equity, P&L, drawdown) |
 
 ---
 
-## Performance Metrics
+## Métricas de rendimiento
 
-### Typical Results (1-day backtest)
+### Resultados típicos (backtest 1 día)
 
 ```
-Total Trades: 95
-Win Rate: 78.9%
-Total P&L: +$3,900 (195 points)
-Profit Factor: 2.08
-Max Drawdown: -$1,420
+Total operaciones: 95
+Tasa de acierto:   78.9%
+P&L total:         +$3.900 (195 puntos)
+Factor de beneficio: 2.08
+Drawdown máximo:   -$1.420
 
-Winners: 75 trades (avg: +$100)
-Losers: 20 trades (avg: -$180)
+Ganadoras: 75 operaciones (media: +$100)
+Perdedoras: 20 operaciones (media: -$180)
 
-BUY trades: 44 (46.3%) → +$1,600
-SELL trades: 51 (53.7%) → +$2,300
+Operaciones COMPRA: 44 (46.3%) → +$1.600
+Operaciones VENTA:  51 (53.7%) → +$2.300
 ```
 
-### Processing Speed
+### Velocidad de procesamiento
 
-- **Tick Processing**: ~193K ticks → ~61K frames in 2-3 minutes
-- **Big Volume Detection**: ~61K frames → ~22-103 events in <10 seconds
-- **Strategy Backtest**: ~22-103 events → ~20-95 trades in <30 seconds
-- **Chart Generation**: 3 HTML files in <20 seconds
-- **Total Pipeline**: 3-4 minutes end-to-end
+- **Procesamiento de ticks**: ~193K ticks → ~61K frames en 2-3 minutos
+- **Detección de volumen alto**: ~61K frames → ~22-103 eventos en <10 segundos
+- **Backtest de estrategia**: ~22-103 eventos → ~20-95 operaciones en <30 segundos
+- **Generación de gráficos**: 3 archivos HTML en <20 segundos
+- **Pipeline completo**: 3-4 minutos de principio a fin
 
 ---
 
-## Advanced Features
+## Funciones avanzadas
 
-### SMA Filter
+### Filtro SMA
 
 ```python
 FILTER_BY_SMA = True
 ```
 
-**Logic**:
-- Price < SMA-200 → ONLY SELL orders
-- Price > SMA-200 → ONLY BUY orders
+**Lógica**:
+- Precio < SMA-200 → SOLO órdenes de VENTA
+- Precio > SMA-200 → SOLO órdenes de COMPRA
 
-### Time-of-Day Filter
+### Filtro horario
 
 ```python
 FILTER_TIME_OF_DAY = True
@@ -331,198 +335,150 @@ START_TRADING_TIME = "18:50:00"
 END_TRADING_TIME = "22:50:00"
 ```
 
-**Logic**: Only trades within specified hours
+**Lógica**: Solo opera dentro del horario especificado
 
-### GRID System (Second Entry)
+### Sistema GRID (Segunda entrada)
 
 ```python
 FILTER_USE_GRID = True
 GRID_MEAN_REVERS_EXPAND = 5.0
 ```
 
-**Logic**:
-- 1st entry: `MEAN_REVERS_EXPAND` (10 pts)
-- 2nd entry: `MEAN_REVERS_EXPAND + GRID_MEAN_REVERS_EXPAND` (15 pts)
-- TP/SL calculated from average entry price
+**Lógica**:
+- 1ª entrada: `MEAN_REVERS_EXPAND` (10 pts)
+- 2ª entrada: `MEAN_REVERS_EXPAND + GRID_MEAN_REVERS_EXPAND` (15 pts)
+- TP/SL calculados desde precio medio de entrada
 
-### Trailing Stop
+### Stop Trailing
 
 ```python
 SMA_TRAILING_STOP = True
 TRAILING_STOP_ATR_MULT = 0.75
 ```
 
-**Logic**:
-- **Disables** fixed TP (let profits run)
-- LONG: SL = `highest_price - TRAILING_STOP_ATR_MULT` (moves UP only)
-- SHORT: SL = `lowest_price + TRAILING_STOP_ATR_MULT` (moves DOWN only)
+**Lógica**:
+- **Desactiva** el TP fijo (deja correr los beneficios)
+- LARGO: SL = `precio_máximo - TRAILING_STOP_ATR_MULT` (solo sube)
+- CORTO: SL = `precio_mínimo + TRAILING_STOP_ATR_MULT` (solo baja)
 
 ---
 
-## Troubleshooting
+## Solución de problemas
 
-### Issue: No data file found
+### Error: No se encuentra el archivo de datos
 
 ```
 FileNotFoundError: Data file not found: db_trinchera_all_data_20251104.csv
 ```
 
-**Solution**:
+**Solución**:
 ```bash
-# main_trinchera.py will auto-run util_trinchera.py if missing
+# main_trinchera.py ejecuta util_trinchera.py automáticamente si falta
 python main_trinchera.py
 ```
 
-### Issue: No big volume events detected
+### Error: No se detectan eventos de volumen alto
 
-**Solution**: Lower volume trigger
+**Solución**: Bajar el umbral de volumen
 ```python
-BIG_VOLUME_TRIGGER = 150  # Lower from 200
+BIG_VOLUME_TRIGGER = 150  # Bajar desde 200
 ```
 
-### Issue: No trades executed
+### Error: No se ejecutan operaciones
 
-**Solution**: Increase mean reversion distance
+**Solución**: Aumentar la distancia de mean reversion
 ```python
-MEAN_REVERS_EXPAND = 15  # Increase from 10
+MEAN_REVERS_EXPAND = 15  # Aumentar desde 10
 ```
 
-### Issue: Charts not opening
+### Error: Los gráficos no se abren
 
-**Solution**: Manually open from `charts/` folder
+**Solución**: Abrirlos manualmente desde la carpeta `charts/`
 ```bash
 # Windows
 explorer charts\chart_trinchera_trades_20251104.html
-
-# Linux/Mac
-open charts/chart_trinchera_trades_20251104.html
 ```
 
-### Issue: Chart X-axis misalignment (different time ranges)
+### Error: Desalineación del eje X en gráficos
 
-**Symptom**: Chart shows data from two different dates on same X-axis
+**Síntoma**: El gráfico muestra datos de dos fechas distintas en el mismo eje X
 
-**Cause**: Different data sources (price, trades, bins) loading from different dates
+**Causa**: Distintas fuentes de datos cargando desde fechas diferentes
 
-**Solution**: Ensure all scripts use `DATE` from `config_trinchera.py`:
+**Solución**: Asegúrate de que todos los scripts usan `DATE` de `config_trinchera.py`:
 ```python
-# ✅ Correct (uses DATE from config)
+# Correcto (usa DATE de config)
 BINS_FILE = OUTPUTS_DIR / f"db_trinchera_bins_{DATE}.csv"
 
-# ❌ Wrong (searches for latest file - can load wrong date)
+# Incorrecto (busca el archivo más reciente — puede cargar fecha incorrecta)
 bins_files = sorted(OUTPUTS_DIR.glob("db_trinchera_bins_*.csv"))
 BINS_FILE = bins_files[-1]
 ```
 
-**Verification**: All files should show same DATE:
-- `db_trinchera_all_data_{DATE}.csv`
-- `db_trinchera_bins_{DATE}.csv`
-- `db_trinchera_TR_{DATE}.csv`
-
 ---
 
-## Batch Processing Multiple Dates
+## Procesamiento por lotes de múltiples fechas
 
 ```python
 # batch_process.py
 from pathlib import Path
 import subprocess
 
-dates = ["20251103", "20251104", "20251105"]
+fechas = ["20251103", "20251104", "20251105"]
 
-for date in dates:
-    # Update config
+for fecha in fechas:
     config = Path("config_trinchera.py").read_text()
-    config = config.replace(
-        f'DATE = "{dates[0]}"' if dates[0] else 'DATE = "20251104"',
-        f'DATE = "{date}"'
-    )
+    config = config.replace(f'DATE = "{fechas[0]}"', f'DATE = "{fecha}"')
     Path("config_trinchera.py").write_text(config)
-
-    # Run pipeline
     subprocess.run(["python", "main_trinchera.py"])
 ```
 
 ---
 
-## Strategy Optimization
+## Optimización de la estrategia
 
-### Parameter Sensitivity
+### Sensibilidad de parámetros
 
-| Parameter | Effect | Recommendation |
-|-----------|--------|----------------|
-| `BIG_VOLUME_TRIGGER` | Lower = More trades | Start at 200, test 150-300 |
-| `MEAN_REVERS_EXPAND` | Higher = More touches | Test 8-15 points |
-| `TP_POINTS` | Higher = Better R:R | Test 4-10 points |
-| `SL_POINTS` | Lower = Less risk | Test 7-12 points |
+| Parámetro | Efecto | Recomendación |
+|-----------|--------|---------------|
+| `BIG_VOLUME_TRIGGER` | Más bajo = más operaciones | Empieza en 200, prueba 150-300 |
+| `MEAN_REVERS_EXPAND` | Más alto = más toques | Prueba 8-15 puntos |
+| `TP_POINTS` | Más alto = mejor ratio R:R | Prueba 4-10 puntos |
+| `SL_POINTS` | Más bajo = menos riesgo | Prueba 7-12 puntos |
 
-### Optimization Workflow
+### Flujo de optimización
 
-1. Run baseline with default parameters
-2. Modify ONE parameter at a time
-3. Compare metrics (Profit Factor, Sharpe, Drawdown)
-4. Document results in `optimization_log.csv`
-
----
-
-## Development
-
-### Adding New Features
-
-1. **Update `config_trinchera.py`** with new parameters
-2. **Modify strategy script** (`strat_trinchera.py`)
-3. **Test on single date** first
-4. **Update README.md** with documentation
-5. **Commit changes** with descriptive message
-
-### Code Style
-
-- European CSV format: `sep=';', decimal=','`
-- Use `DATE` parameter from config
-- Progress messages: `[INFO]`, `[OK]`, `[ERROR]`
-- All outputs include `{DATE}` in filename
+1. Ejecuta la línea base con parámetros por defecto
+2. Modifica UN parámetro a la vez
+3. Compara métricas (Factor de beneficio, Sharpe, Drawdown)
+4. Documenta resultados en `optimization_log.csv`
 
 ---
 
-## Citation
+## Licencia
 
-If you use this strategy in research or production:
-
-```bibtex
-@software{trinchera2025,
-  title={Trinchera Mean Reversion Strategy},
-  author={Ferran Font},
-  year={2025},
-  url={https://github.com/ferranfont/trinchera}
-}
-```
+Propietario — Solo uso interno
 
 ---
 
-## License
+## Soporte
 
-Proprietary - Internal use only
-
----
-
-## Support
-
-For questions or issues:
-1. Check [Troubleshooting](#troubleshooting) section
-2. Review code comments in Python files
-3. Contact: [GitHub Issues](https://github.com/ferranfont/trinchera/issues)
+Para preguntas o problemas:
+1. Consulta la sección [Solución de problemas](#solución-de-problemas)
+2. Revisa los comentarios en los archivos Python
+3. Contacto: [GitHub Issues](https://github.com/ferranfont/trinchera/issues)
 
 ---
 
-**Version**: 2.0
-**Last Updated**: 2025-11-22
-**Status**: Production Ready ✅
+**Versión**: 2.0
+**Última actualización**: 2025-11-22
+**Estado**: Listo para producción
 
-**Key Improvements in v2.0**:
-- ✅ Fully portable with local `utils/` folder
-- ✅ Centralized DATE configuration (all files use config_trinchera.py)
-- ✅ Automatic data processing in pipeline
-- ✅ Date displayed in all HTML titles and filenames
-- ✅ Self-contained (no external dependencies)
-- ✅ Fixed X-axis alignment in charts (all data sources use same DATE)
-- ✅ Removed duplicate time filter code (unified in config)
+**Mejoras clave en v2.0**:
+- Totalmente portable con carpeta local `utils/`
+- Configuración DATE centralizada (todos los archivos usan config_trinchera.py)
+- Procesamiento automático de datos en el pipeline
+- Fecha mostrada en todos los títulos HTML y nombres de archivo
+- Autónomo (sin dependencias externas)
+- Alineación de eje X corregida en gráficos
+- Código de filtro horario unificado en config
